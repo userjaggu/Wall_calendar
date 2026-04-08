@@ -365,7 +365,6 @@ export default function CalendarGrid({
           { style: { background: `linear-gradient(135deg,${T.accent},${T.glow})` }, label: "Selected" },
           { style: { background: `${T.accent}35` },                                  label: "In Range" },
           { style: { border: `2px solid ${T.accent}`, background: "transparent" },   label: "Today"    },
-          { style: { background: "#ef4444" },                                         label: "Holiday"  },
           { style: { background: T.accent, borderRadius: "50%" },                    label: "Note"     },
         ].map(({ style, label }) => (
           <div key={label} style={{ display: "flex", alignItems: "center", gap: 4 }}>

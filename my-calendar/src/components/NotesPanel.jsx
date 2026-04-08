@@ -63,11 +63,12 @@ export default function NotesPanel({
     <div
       className="notes-panel"
       style={{
-        flex: "0 1 275px",
-        minWidth: 195,
+        flex: "0 0 auto",
+        minWidth: "min(300px, 100%)",
         display: "flex",
         flexDirection: "column",
-        borderLeft: `1px solid ${isDark ? "#14141f" : "#eef1f6"}`,
+        borderLeft: window.innerWidth > 768 ? `1px solid ${isDark ? "#14141f" : "#eef1f6"}` : "none",
+        borderTop: window.innerWidth <= 768 ? `2.5px solid ${isDark ? "#14141f" : "#eef1f6"}` : "none",
         background: isDark
           ? "linear-gradient(180deg, #0a0a16 0%, #0c0c18 100%)"
           : "linear-gradient(180deg, #f9fafd 0%, #f4f6fb 100%)",
@@ -75,23 +76,29 @@ export default function NotesPanel({
     >
       {/* Header */}
       <div style={{
-        padding: "14px 16px 10px",
-        borderBottom: `1px solid ${isDark ? "#14141f" : "#eef1f6"}`,
+        padding: "20px 20px 14px",
+        borderBottom: `2.5px solid ${isDark ? "#14141f" : "#eef1f6"}`,
+        background: isDark ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.4)",
       }}>
         {/* Title + tag row */}
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          marginBottom: 10,
-        }}>
-          <span style={{
-            fontSize: 9, fontWeight: 800, letterSpacing: 2,
-            color: isDark ? "#252540" : "#c8d0dc",
-            textTransform: "uppercase",
+          <div style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            marginBottom: 16,
           }}>
-            ✦ Notes
-          </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <span style={{
+                fontSize: 9, fontWeight: 800, letterSpacing: 2.5,
+                color: isDark ? "#252540" : "#c8d0dc",
+                textTransform: "uppercase",
+              }}>
+                ✦ Add Notes
+              </span>
+              <span style={{ fontSize: 8, color: isDark ? "#1e1e32" : "#dde3ea", fontWeight: 700 }}>
+                {isNoteActive ? "SYSTEM READY" : "IDLE"}
+              </span>
+            </div>
 
-          {/* Tag buttons — enlarged touch target */}
+            {/* Tag buttons — enlarged touch target */}
           <div style={{ display: "flex", gap: 4 }}>
             {Object.entries(NOTE_TAGS).map(([key, tag]) => (
               <button
@@ -166,30 +173,32 @@ export default function NotesPanel({
         </div>
       </div>
 
-      {/* Textarea */}
-      <div style={{ padding: "6px 12px 8px", position: "relative" }}>
-        <textarea
-          ref={textareaRef}
-          value={noteText}
-          onChange={e => onNoteChange(e.target.value)}
-          disabled={!isNoteActive}
-          placeholder={isNoteActive ? "Write your note here…" : "Select dates or double-tap a day…"}
-          style={{
-            width: "100%", minHeight: 110,
-            padding: "10px 12px",
-            borderRadius: 10,
-            border: `1.5px solid ${isDark ? "#1a1a28" : "#e5eaf2"}`,
-            background: isDark
-              ? (isNoteActive ? "#0a0a14" : "#080810")
-              : (isNoteActive ? "#ffffff" : "#f0f2f8"),
-            color: isDark ? "#c8c8e0" : "#2d3748",
-            fontSize: 12, lineHeight: 1.65,
-            resize: "vertical", outline: "none",
-            fontFamily: "inherit",
-            transition: "border-color 0.2s, box-shadow 0.2s, background 0.3s",
-            boxSizing: "border-box",
-            opacity: isNoteActive ? 1 : 0.4,
-          }}
+        {/* Textarea */}
+        <div style={{ padding: "10px 16px 8px", position: "relative" }}>
+          <textarea
+            ref={textareaRef}
+            value={noteText}
+            onChange={e => onNoteChange(e.target.value)}
+            disabled={!isNoteActive}
+            placeholder={isNoteActive ? "Write your note here…" : "Select dates or double-tap a day…"}
+            style={{
+              width: "100%", 
+              minHeight: window.innerWidth <= 600 ? 120 : 110,
+              padding: "12px 14px",
+              borderRadius: 14,
+              border: `1.5px solid ${isDark ? "#1a1a28" : "#e5eaf2"}`,
+              background: isDark
+                ? (isNoteActive ? "#0a0a14" : "#080810")
+                : (isNoteActive ? "#ffffff" : "#f4f6fb"),
+              color: isDark ? "#c8c8e0" : "#2d3748",
+              fontSize: 13, lineHeight: 1.6,
+              resize: "none", outline: "none",
+              fontFamily: "inherit",
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              boxSizing: "border-box",
+              opacity: isNoteActive ? 1 : 0.4,
+              boxShadow: isDark ? "inset 0 2px 4px rgba(0,0,0,0.3)" : "inset 0 1px 2px rgba(0,0,0,0.05)",
+            }}
           onFocus={e => {
             e.target.style.borderColor = T.accent;
             e.target.style.boxShadow = `0 0 0 3px ${T.accent}20, 0 4px 16px rgba(0,0,0,0.15)`;
@@ -217,7 +226,7 @@ export default function NotesPanel({
 
       {/* Submit button for the textarea */}
       {isNoteActive && (
-        <div style={{ padding: "0 12px 10px" }}>
+        <div style={{ padding: "0 16px 16px" }}>
           <button
             onClick={handleSubmit}
             style={{
@@ -225,24 +234,24 @@ export default function NotesPanel({
               background: T.accent,
               color: "#fff",
               border: "none",
-              borderRadius: 10,
-              padding: "10px 0",
-              fontSize: 12,
+              borderRadius: 12,
+              padding: "14px 0",
+              fontSize: 13,
               fontWeight: 800,
               cursor: "pointer",
-              boxShadow: `0 4px 12px ${T.accent}33`,
-              transition: "transform 0.2s, box-shadow 0.2s, opacity 0.2s",
+              boxShadow: `0 8px 24px ${T.accent}44`,
+              transition: "all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
               opacity: noteText.trim() ? 1 : 0.6,
             }}
             onMouseEnter={e => {
               if (noteText.trim()) {
-                e.currentTarget.style.transform = "translateY(-1px)";
-                e.currentTarget.style.boxShadow = `0 6px 16px ${T.accent}44`;
+                e.currentTarget.style.transform = "translateY(-2px) scale(1.01)";
+                e.currentTarget.style.boxShadow = `0 12px 28px ${T.accent}55`;
               }
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.transform = "translateY(0)";
-              e.currentTarget.style.boxShadow = `0 4px 12px ${T.accent}33`;
+              e.currentTarget.style.transform = "translateY(0) scale(1)";
+              e.currentTarget.style.boxShadow = `0 8px 24px ${T.accent}44`;
             }}
           >
             Submit Note
@@ -251,38 +260,47 @@ export default function NotesPanel({
       )}
 
       {/* Chips for "THIS MONTH" below submit */}
-      <div style={{ padding: "0 16px 12px" }}>
+      <div style={{ padding: "16px 16px 80px", marginTop: "auto" }}>
         <div style={{
           fontSize: 9, fontWeight: 800, letterSpacing: 2,
           color: isDark ? "#252540" : "#c8d0dc",
-          textTransform: "uppercase", marginBottom: 8,
+          textTransform: "uppercase", marginBottom: 12,
           display: "flex", alignItems: "center", gap: 6
         }}>
           THIS MONTH 📌
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ 
+          display: "flex", flexWrap: "wrap", gap: 8,
+        }}>
           {notesList.map((n, i) => {
             const tag = NOTE_TAGS[n.tag];
             return (
               <div key={n.key || i} 
                 onClick={() => onNoteClick(n)}
                 style={{
-                  padding: "4px 10px", borderRadius: 20,
+                  padding: "6px 12px", borderRadius: 20,
                   background: isDark ? "#0e0e1a" : "#f0f4fb",
                   borderLeft: `3px solid ${tag?.color || T.accent}`,
                   fontSize: 10, display: "flex", alignItems: "center", gap: 6,
                   color: isDark ? "#b0b0cc" : "#4a5568",
-                  maxWidth: "100%", overflow: "hidden",
+                  maxWidth: "100%", 
                   cursor: "pointer",
-                  transition: "transform 0.2s",
+                  transition: "all 0.2s ease",
+                  boxShadow: isDark ? "0 2px 4px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.05)",
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = isDark ? "0 4px 8px rgba(0,0,0,0.3)" : "0 4px 8px rgba(0,0,0,0.1)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = isDark ? "0 2px 4px rgba(0,0,0,0.2)" : "0 2px 4px rgba(0,0,0,0.05)";
+                }}
               >
                 <span>{tag?.icon}</span>
                 <span style={{ 
                   whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", 
-                  maxWidth: 100 
+                  maxWidth: 120 
                 }}>
                   {n.text.slice(0, 40)}{n.text.length > 40 && "..."}
                 </span>
@@ -292,8 +310,10 @@ export default function NotesPanel({
                     onDeleteNote(n.key);
                   }}
                   style={{ 
-                    background: "none", border: "none", cursor: "pointer", 
-                    fontSize: 12, padding: 0, color: "inherit", opacity: 0.6 
+                    background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)", 
+                    border: "none", borderRadius: "50%", width: 18, height: 18,
+                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                    fontSize: 14, color: "inherit", opacity: 0.6, marginLeft: 4
                   }}
                 >
                   ×

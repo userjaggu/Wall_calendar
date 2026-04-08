@@ -250,7 +250,7 @@ export function useCalendar() {
   const cells     = buildCalendarCells(year, month);
   const rangeDays = daysBetween(rangeStart, rangeEnd);
   const notesList = Object.values(notes)
-    .filter(n => n.text?.trim() && n.month === month && n.year === year)
+    .filter(n => n.text?.trim() && n.month === month && n.year === year && !n.isHoliday)
     .sort((a, b) => b.ts - a.ts);
   const previewEnd = selecting === "end" && hoverDay
     ? new Date(year, month, hoverDay)

@@ -67,9 +67,9 @@ export default function WallCalendar() {
   return (
     <div style={{
       minHeight: "100vh",
-      padding: "clamp(12px, 3vw, 36px)",
+      padding: "clamp(0px, 2vw, 36px)",
       display: "flex", alignItems: "center", justifyContent: "center",
-      position: "relative", overflow: "hidden",
+      position: "relative",
       background: isDark
         ? `radial-gradient(ellipse at 15% 50%, ${T.glow}18 0%, transparent 55%),
            radial-gradient(ellipse at 85% 20%, ${T.accent}12 0%, transparent 50%),
@@ -138,11 +138,13 @@ export default function WallCalendar() {
       {/* ═══════════════ CALENDAR CARD ═══════════════ */}
       <div
         ref={cardRef}
-        className="calendar-card calendar-card-enter"
+        className="calendar-card"
         style={{
           width: "100%", maxWidth: 1040,
-          borderRadius: 28,
-          overflow: "hidden",
+          borderRadius: window.innerWidth <= 600 ? 0 : 28,
+          minHeight: window.innerWidth <= 600 ? "100vh" : "auto",
+          overflowY: window.innerWidth <= 600 ? "visible" : "hidden",
+          overflowX: "hidden",
           background: isDark
             ? "linear-gradient(160deg, #0e0e1c 0%, #0c0c18 100%)"
             : "#ffffff",
@@ -206,7 +208,12 @@ export default function WallCalendar() {
               isDark={isDark} onCopyRange={copyRange}
             />
 
-            <div className="calendar-body" style={{ display: "flex", flexWrap: "wrap", minHeight: 380 }}>
+            <div className="calendar-body" style={{ 
+              display: "flex", 
+              flexWrap: "nowrap", 
+              minHeight: 380,
+              flexDirection: window.innerWidth > 850 ? "row" : "column"
+            }}>
               <CalendarGrid
                 month={month} year={year} cells={cells}
                 getDayState={getDayState}
@@ -240,20 +247,29 @@ export default function WallCalendar() {
 
             {/* Footer */}
             <div style={{
-              padding: "9px 22px",
+              padding: "12px 22px",
               borderTop: `1px solid ${isDark ? "#12121e" : "#eef1f6"}`,
               display: "flex", justifyContent: "space-between", alignItems: "center",
-              flexWrap: "wrap", gap: 6,
-              background: isDark ? "rgba(0,0,0,0.18)" : "rgba(255,255,255,0.4)",
+              flexWrap: "wrap", gap: 10,
+              background: isDark ? "#0e0e1c" : "#fff",
+              minHeight: "44px",
+              position: "relative",
+              bottom: 0,
+              zIndex: 50,
             }}>
               <span style={{
                 fontSize: 9,
-                color: isDark ? "#333354" : "#b0bac8",
+                color: isDark ? "#444466" : "#a0acbc",
                 fontWeight: 600, letterSpacing: 0.5,
+                flex: "1 1 200px",
               }}>
                 ← → keys • Click = range • Dbl-click = day note • ESC = clear
               </span>
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ 
+                display: "flex", alignItems: "center", gap: 8,
+                justifyContent: window.innerWidth <= 600 ? "flex-start" : "flex-end",
+                flex: window.innerWidth <= 600 ? "1 1 100%" : "0 1 auto"
+              }}>
                 <div style={{
                   width: 8, height: 8, borderRadius: "50%",
                   background: `linear-gradient(135deg, ${T.accent}, ${T.glow})`,
@@ -261,7 +277,7 @@ export default function WallCalendar() {
                 }}/>
                 <span style={{
                   fontSize: 9, fontWeight: 800, letterSpacing: 1.5,
-                  color: isDark ? "#333354" : "#b0bac8",
+                  color: isDark ? "#444466" : "#a0acbc",
                 }}>
                   {T.name.toUpperCase()} · {T.mood.toUpperCase()}
                 </span>
