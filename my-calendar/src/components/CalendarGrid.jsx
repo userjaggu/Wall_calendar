@@ -248,9 +248,9 @@ export default function CalendarGrid({
           const st = getDayState(day, colIdx);
           const {
             isToday, isStart, isEnd, isInRange, isInPreview, isPreviewEnd,
-            isWeekend, holiday, hasNote, isPulsing,
+            isWeekend, holiday, hasNote, isPulsing, isActiveDay,
           } = st;
-          const isActive = isStart || isEnd;
+          const isActive = isStart || isEnd || isActiveDay;
           const isHov    = hoveredCell === day && !isActive;
 
           let bgCell = "transparent";

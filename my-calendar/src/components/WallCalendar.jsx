@@ -23,6 +23,7 @@ export default function WallCalendar() {
     cells, rangeDays, notesList, navigate, goToMonth, clearRange,
     handleDayClick, handleDayDoubleClick, copyRange,
     getNoteText, saveNote, deleteNote, getDayState,
+    setPendingKey, noteKey, handleNoteClick,
   } = cal;
 
   const T      = MONTH_THEMES[month];
@@ -230,6 +231,10 @@ export default function WallCalendar() {
                 noteTag={noteTag} setNoteTag={setNoteTag}
                 isDark={isDark}
                 className="notes-panel"
+                setPendingKey={setPendingKey}
+                noteKey={noteKey}
+                onNoteClick={handleNoteClick}
+                saveNote={saveNote}
               />
             </div>
 

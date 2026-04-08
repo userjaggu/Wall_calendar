@@ -6,12 +6,43 @@ export default function NotesPanel({
   month, year, noteMode, setNoteMode, activeDay,
   rangeStart, rangeEnd, noteText, onNoteChange,
   notesList, onDeleteNote, noteTag, setNoteTag, isDark,
+  setPendingKey, noteKey, onNoteClick, saveNote,
 }) {
   const T = MONTH_THEMES[month];
   const textareaRef  = useRef(null);
   const isNoteActive = noteMode === "range"
     ? (rangeStart && rangeEnd)
     : !!activeDay;
+
+  const handleAddReminder = () => {
+    if (!noteText.trim()) return;
+    const baseKey = noteKey();
+    const newUniqueKey = `${baseKey}__r${Date.now()}`;
+    
+    // Save current
+    onNoteChange(noteText); 
+    
+    // Prepare for next
+    setPendingKey(newUniqueKey);
+    onNoteChange(""); 
+    
+    if (textareaRef.current) textareaRef.current.focus();
+  };
+
+  const handleSubmit = () => {
+    if (!noteText.trim()) return;
+    
+    // 1. Force a save with the current text first
+    saveNote(noteText);
+    
+    // 2. Then clear the textarea UI
+    // Note: We don't call saveNote("") because that would overwrite 
+    // the note with an empty string. We just manually clear the prop 
+    // or rely on the parent state.
+    onNoteChange("");
+    
+    if (textareaRef.current) textareaRef.current.focus();
+  };
 
   // Auto-focus when context becomes active
   useEffect(() => {
@@ -184,73 +215,95 @@ export default function NotesPanel({
         )}
       </div>
 
-      {/* Saved notes list */}
-      <div style={{
-        flex: 1, overflowY: "auto",
-        WebkitOverflowScrolling: "touch",
-        padding: "0 10px 12px",
-        minHeight: 0,
-      }}>
-        {notesList.length === 0 ? (
-          <div style={{
-            textAlign: "center", padding: "18px 0",
-            color: isDark ? "#1a1a28" : "#dde3ea",
-            fontSize: 11,
-          }}>
-            No notes yet
-          </div>
-        ) : (
-          notesList.map((n, i) => {
+      {/* Submit button for the textarea */}
+      {isNoteActive && (
+        <div style={{ padding: "0 12px 10px" }}>
+          <button
+            onClick={handleSubmit}
+            style={{
+              width: "100%",
+              background: T.accent,
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              padding: "10px 0",
+              fontSize: 12,
+              fontWeight: 800,
+              cursor: "pointer",
+              boxShadow: `0 4px 12px ${T.accent}33`,
+              transition: "transform 0.2s, box-shadow 0.2s, opacity 0.2s",
+              opacity: noteText.trim() ? 1 : 0.6,
+            }}
+            onMouseEnter={e => {
+              if (noteText.trim()) {
+                e.currentTarget.style.transform = "translateY(-1px)";
+                e.currentTarget.style.boxShadow = `0 6px 16px ${T.accent}44`;
+              }
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.boxShadow = `0 4px 12px ${T.accent}33`;
+            }}
+          >
+            Submit Note
+          </button>
+        </div>
+      )}
+
+      {/* Chips for "THIS MONTH" below submit */}
+      <div style={{ padding: "0 16px 12px" }}>
+        <div style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: 2,
+          color: isDark ? "#252540" : "#c8d0dc",
+          textTransform: "uppercase", marginBottom: 8,
+          display: "flex", alignItems: "center", gap: 6
+        }}>
+          THIS MONTH 📌
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {notesList.map((n, i) => {
             const tag = NOTE_TAGS[n.tag];
             return (
-              <div key={n.key || i} style={{
-                padding: "7px 10px", marginBottom: 5, borderRadius: 9,
-                background: isDark ? "#0e0e1a" : "#f0f4fb",
-                border: `1px solid ${isDark ? "#16161f" : "#e8edf5"}`,
-                borderLeft: `3px solid ${tag?.color || T.accent}`,
-                display: "flex", gap: 7, alignItems: "flex-start",
-                transition: "transform 0.15s, box-shadow 0.15s",
-              }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.transform  = "translateX(2px)";
-                  e.currentTarget.style.boxShadow  = "0 4px 12px rgba(0,0,0,0.12)";
+              <div key={n.key || i} 
+                onClick={() => onNoteClick(n)}
+                style={{
+                  padding: "4px 10px", borderRadius: 20,
+                  background: isDark ? "#0e0e1a" : "#f0f4fb",
+                  borderLeft: `3px solid ${tag?.color || T.accent}`,
+                  fontSize: 10, display: "flex", alignItems: "center", gap: 6,
+                  color: isDark ? "#b0b0cc" : "#4a5568",
+                  maxWidth: "100%", overflow: "hidden",
+                  cursor: "pointer",
+                  transition: "transform 0.2s",
                 }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.transform  = "translateX(0)";
-                  e.currentTarget.style.boxShadow  = "none";
-                }}
+                onMouseEnter={e => e.currentTarget.style.transform = "translateY(-1px)"}
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
               >
-                <span style={{ fontSize: 12, flexShrink: 0, marginTop: 1 }}>
-                  {tag?.icon || "📝"}
+                <span>{tag?.icon}</span>
+                <span style={{ 
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", 
+                  maxWidth: 100 
+                }}>
+                  {n.text.slice(0, 40)}{n.text.length > 40 && "..."}
                 </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 10, color: isDark ? "#888" : "#667", lineHeight: 1.5, wordBreak: "break-word" }}>
-                    {n.text.length > 90 ? n.text.slice(0, 90) + "…" : n.text}
-                  </div>
-                </div>
-                {/* Delete — enlarged touch target */}
-                <button
-                  onClick={() => onDeleteNote(n.key)}
-                  aria-label="Delete note"
-                  style={{
-                    background: "none", border: "none",
-                    color: isDark ? "#1e1e2e" : "#d8dde8",
-                    cursor: "pointer", fontSize: 14, lineHeight: 1,
-                    flexShrink: 0, padding: "2px 4px",
-                    minWidth: 32, minHeight: 32,   // Visual 32px
-                    transition: "color 0.15s",
-                    display: "flex", alignItems: "center", justifyContent: "center",
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDeleteNote(n.key);
                   }}
-                  onMouseEnter={e => e.currentTarget.style.color = "#ef4444"}
-                  onMouseLeave={e => e.currentTarget.style.color = isDark ? "#1e1e2e" : "#d8dde8"}
+                  style={{ 
+                    background: "none", border: "none", cursor: "pointer", 
+                    fontSize: 12, padding: 0, color: "inherit", opacity: 0.6 
+                  }}
                 >
-                  ✕
+                  ×
                 </button>
               </div>
             );
-          })
-        )}
+          })}
+        </div>
       </div>
+
     </div>
   );
 }

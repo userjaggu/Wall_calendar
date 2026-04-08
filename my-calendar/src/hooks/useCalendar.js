@@ -38,6 +38,7 @@ export function useCalendar() {
   const [highlightWeekends, setHighlightWeekends] = useState(true);
   const [noteTag, setNoteTag]   = useState("personal");
   const [copyToast, setCopyToast] = useState(false);
+  const [pendingKey, setPendingKey] = useState(null);
 
   // Persist notes
   useEffect(() => {
@@ -197,27 +198,55 @@ export function useCalendar() {
   }
 
   function getNoteText() {
+    if (pendingKey && notes[pendingKey]) return notes[pendingKey].text || "";
     const k = noteKey();
     return k ? (notes[k]?.text || "") : "";
   }
 
   function saveNote(text) {
-    const k = noteKey();
+    const k = pendingKey || noteKey();
     if (!k) return;
+    
+    // If text is empty, we don't want to delete the note completely 
+    // unless that's intended, but here the user wants to clear the 
+    // textarea without losing the note from the monthly list.
+    // So we only update if there's actual text.
+    if (!text.trim()) return;
+
     setNotes(prev => ({
       ...prev,
-      [k]: { text, tag: noteTag, ts: Date.now(), key: k },
+      [k]: { text, tag: noteTag, ts: Date.now(), key: k, month, year },
     }));
+    if (pendingKey) setPendingKey(null);
   }
 
   function deleteNote(k) {
     setNotes(prev => { const n = { ...prev }; delete n[k]; return n; });
   }
 
+  function handleNoteClick(n) {
+    // If it's a range note, restore range
+    if (n.key.startsWith("range__")) {
+      const parts = n.key.split("__");
+      setRangeStart(new Date(parts[1]));
+      setRangeEnd(new Date(parts[2]));
+      setNoteMode("range");
+    } else if (n.key.startsWith("day__")) {
+      // day__year__month__day
+      const parts = n.key.split("__");
+      setRangeStart(null);
+      setRangeEnd(null);
+      setNoteMode("day");
+      setActiveDay(parseInt(parts[3], 10));
+    }
+  }
+
   // Derived
   const cells     = buildCalendarCells(year, month);
   const rangeDays = daysBetween(rangeStart, rangeEnd);
-  const notesList = Object.values(notes).filter(n => n.text?.trim()).sort((a, b) => b.ts - a.ts);
+  const notesList = Object.values(notes)
+    .filter(n => n.text?.trim() && n.month === month && n.year === year)
+    .sort((a, b) => b.ts - a.ts);
   const previewEnd = selecting === "end" && hoverDay
     ? new Date(year, month, hoverDay)
     : null;
@@ -236,9 +265,10 @@ export function useCalendar() {
     const hasNote     = !!notes[`day__${year}__${month}__${day}`]?.text;
     const isHovered   = hoverDay === day;
     const isPulsing   = pulseDay === day;
+    const isActiveDay = noteMode === "day" && activeDay === day;
     return {
       isToday, isStart, isEnd, isInRange, isInPreview, isPreviewEnd,
-      isWeekend, holiday, hasNote, isHovered, isPulsing,
+      isWeekend, holiday, hasNote, isHovered, isPulsing, isActiveDay,
     };
   }
 
@@ -251,5 +281,6 @@ export function useCalendar() {
     cells, rangeDays, notesList, previewEnd,
     navigate, goToMonth, clearRange, handleDayClick, handleDayDoubleClick,
     copyRange, noteKey, getNoteText, saveNote, deleteNote, getDayState,
+    setPendingKey, handleNoteClick,
   };
 }
