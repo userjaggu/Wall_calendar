@@ -316,10 +316,8 @@ export default function CalendarGrid({
                     cursor: "pointer",
                     position: "relative",
                     transition: "all 0.14s ease",
-                    outline: isToday && !isActive
-                      ? `2px solid ${T.accent}`
-                      : previewEndOutline,
-                    outlineOffset: isToday ? -2 : -2,
+                    outline: isActive ? `2px solid #fff` : (isToday ? `2px solid ${T.accent}` : previewEndOutline),
+                    outlineOffset: -2,
                     userSelect: "none",
                     WebkitUserSelect: "none",
                     // min touch size 44px handled by aspect-ratio + gap, fine on ≥360px

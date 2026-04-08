@@ -67,6 +67,7 @@ export default function NotesPanel({
                 key={key}
                 onClick={() => setNoteTag(key)}
                 title={tag.label}
+                aria-label={tag.label}
                 style={{
                   // 32px visual + padding for 44px touch target
                   width: 32, height: 32, borderRadius: 9,
@@ -230,12 +231,13 @@ export default function NotesPanel({
                 {/* Delete — enlarged touch target */}
                 <button
                   onClick={() => onDeleteNote(n.key)}
+                  aria-label="Delete note"
                   style={{
                     background: "none", border: "none",
                     color: isDark ? "#1e1e2e" : "#d8dde8",
                     cursor: "pointer", fontSize: 14, lineHeight: 1,
                     flexShrink: 0, padding: "2px 4px",
-                    minWidth: 28, minHeight: 28,   // 28px → with padding ≈ 36px touch target
+                    minWidth: 32, minHeight: 32,   // Visual 32px
                     transition: "color 0.15s",
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}
