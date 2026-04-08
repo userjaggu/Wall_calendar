@@ -200,7 +200,12 @@ export function useCalendar() {
   function getNoteText() {
     if (pendingKey && notes[pendingKey]) return notes[pendingKey].text || "";
     const k = noteKey();
-    return k ? (notes[k]?.text || "") : "";
+    // Only return text if the note exists and belongs to the current month/year
+    const note = k ? notes[k] : null;
+    if (note && note.month === month && note.year === year) {
+      return note.text || "";
+    }
+    return "";
   }
 
   function saveNote(text) {
